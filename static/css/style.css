@@ -1,0 +1,619 @@
+/* فال حافظ — شب یلدا */
+
+@font-face {
+  font-family: "IranNastaliq";
+  src: url("../fonts/IranNastaliq.woff2") format("woff2"),
+       url("../fonts/IranNastaliq.ttf") format("truetype");
+  font-display: block;
+}
+@font-face {
+  font-family: "Noto Naskh Arabic";
+  src: url("../fonts/noto-naskh-arabic-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Naskh Arabic";
+  src: url("../fonts/noto-naskh-arabic-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --night: #06191c;
+  --gold: #e6bb67;
+  --gold-hi: #fbe3a4;
+  --gold-deep: #7a521b;
+  --wine: #6e1219;
+  --lapis: #1d3a66;
+  --lapis-deep: #132a52;
+  --paper: #ecdbae;
+  --ink: #2b1a0e;
+  --ink-soft: #3d2915;
+  --vermilion: #a3271c;
+
+  --f-nast: "IranNastaliq", "Noto Nastaliq Urdu", serif;
+  --f-text: "Noto Naskh Arabic", Tahoma, serif;
+
+  --vh: 100vh;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+/* ارتفاع «بزرگ» مرورگر: با بالا و پایین رفتن نوار آدرس موبایل تغییر نمی‌کند، پس پس‌زمینه جابه‌جا نمی‌شود. */
+@supports (height: 100lvh) {
+  :root { --vh: 100lvh; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+html { background: var(--night); }
+body {
+  background: var(--night);
+  color: var(--gold-hi);
+  font-family: var(--f-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+::selection { background: rgba(230, 187, 103, .32); color: inherit; }
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ───────── صحنه: تصویر با نسبت خودش، تمام‌صفحه و بدون جابه‌جایی نقاط ───────── */
+
+.hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--vh);
+  overflow: hidden;
+  background: var(--night);
+}
+
+.stage {
+  /* تصویر عمودی ۹۴۱×۱۶۷۲ */
+  --w: max(100vw, var(--vh) * .5628);
+  --h: calc(var(--w) * 1.7768);
+  position: absolute;
+  left: 50%;
+  top: calc((var(--vh) - var(--h)) * .42);
+  width: var(--w);
+  height: var(--h);
+  translate: -50% 0;
+  container-type: size;
+  background: var(--night) url("../images/yalda-mobile.webp") center / 100% 100% no-repeat;
+}
+
+.site-title {
+  position: absolute;
+  left: 50%;
+  top: 31.6%;
+  translate: -50% -50%;
+  margin: 0;
+  font: 400 11.8cqw/1.5 var(--f-nast);
+  color: #f2c86f;
+  white-space: nowrap;
+  text-shadow:
+    0 -.012em 0 rgba(255, 244, 205, .75),
+    0 .025em 0 #8a5a1c,
+    0 .05em .14em rgba(0, 0, 0, .6);
+  transition: opacity .5s ease;
+  animation: ink-in 1.8s var(--ease-out) .25s backwards;
+}
+html.is-locked .site-title,
+html.is-locked .glow { opacity: 0; }
+@keyframes ink-in {
+  from { opacity: 0; filter: blur(10px); translate: -50% -40%; }
+}
+
+.glow {
+  position: absolute;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.glow--moon {
+  left: 51%; top: 16.2%;
+  width: 34cqw;
+  background: radial-gradient(closest-side, rgba(255, 214, 140, .32), rgba(255, 190, 100, .1) 55%, transparent);
+  animation: moon-breathe 7s ease-in-out infinite alternate;
+}
+.glow--candle {
+  width: 10cqw;
+  background: radial-gradient(closest-side, rgba(255, 216, 140, .55), rgba(255, 160, 60, .16) 55%, transparent);
+  animation: flicker 2.6s ease-in-out infinite;
+}
+.glow--c1 { left: 3.7%;  top: 49.4%; }
+.glow--c2 { left: 28.6%; top: 51.6%; animation-delay: -.7s; animation-duration: 3.1s; }
+.glow--c3 { left: 71.8%; top: 51.5%; animation-delay: -1.3s; animation-duration: 2.3s; }
+.glow--c4 { left: 96%;   top: 49.4%; animation-delay: -1.9s; animation-duration: 2.9s; }
+
+@keyframes moon-breathe {
+  from { opacity: .55; scale: .96; }
+  to   { opacity: 1;   scale: 1.04; }
+}
+@keyframes flicker {
+  0%, 100% { opacity: .75; scale: 1; }
+  22% { opacity: .95; scale: 1.06; }
+  41% { opacity: .62; scale: .95; }
+  63% { opacity: 1;   scale: 1.08; }
+  80% { opacity: .7;  scale: .98; }
+}
+
+/* ناحیهٔ کلیک دقیقاً روی دکمهٔ نقاشی‌شده */
+.hotspot {
+  position: absolute;
+  left: 31.9%; top: 47.55%;
+  width: 36.1%; height: 5.1%;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color .25s ease;
+}
+.hotspot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 236, 190, .3) 50%, transparent 62%) no-repeat;
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  mix-blend-mode: screen;
+  animation: sheen 6s ease-in-out 2.4s infinite;
+}
+@keyframes sheen {
+  0%   { background-position: 130% 0; }
+  28%, 100% { background-position: -30% 0; }
+}
+.hotspot:hover { background-color: rgba(255, 220, 160, .07); }
+.hotspot:active { background-color: rgba(0, 0, 0, .14); }
+.hotspot:focus-visible {
+  outline: 2px solid var(--gold-hi);
+  outline-offset: 4px;
+}
+.hotspot:disabled { cursor: progress; }
+
+@media (min-aspect-ratio: 9/10) {
+  .stage {
+    /* تصویر افقی ۱۶۷۱×۹۴۱ */
+    --w: max(100vw, var(--vh) * 1.7758);
+    --h: calc(var(--w) * .5631);
+    top: calc((var(--vh) - var(--h)) * .3);
+    background-image: url("../images/yalda-desktop.webp");
+  }
+  .site-title { top: 36.2%; font-size: 7.6cqw; }
+  .glow--moon { left: 51.9%; top: 9.2%; width: 19cqw; }
+  .glow--candle { width: 5.2cqw; }
+  .glow--c1 { left: 6.46%;  top: 45.3%; }
+  .glow--c2 { left: 25.73%; top: 45.5%; }
+  .glow--c3 { left: 73.67%; top: 45.6%; }
+  .glow--c4 { left: 93.54%; top: 45.3%; }
+  .hotspot { left: 39.2%; top: 57.4%; width: 22.45%; height: 10.1%; }
+}
+
+/* ───────── پنجرهٔ فال ───────── */
+
+html.is-locked, html.is-locked body { overflow: hidden; }
+
+.fortune {
+  --read-w: min(100vw - 20px, 34rem);
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+.fortune__veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 42%, rgba(5, 22, 25, .74), rgba(2, 10, 12, .95) 78%);
+  animation: fade-in .5s ease-out both;
+}
+@keyframes fade-in { from { opacity: 0; } }
+
+.fortune__scroll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding:
+    max(76px, calc(env(safe-area-inset-top) + 64px))
+    max(14px, env(safe-area-inset-right))
+    max(36px, calc(env(safe-area-inset-bottom) + 24px))
+    max(14px, env(safe-area-inset-left));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 187, 103, .45) transparent;
+}
+.fortune[data-state="sealed"] .fortune__scroll,
+.fortune[data-state="opening"] .fortune__scroll { padding-top: max(36px, calc(env(safe-area-inset-top) + 24px)); }
+.fortune[data-state="sealed"] .hint,
+.fortune[data-state="opening"] .hint { margin-top: auto; }
+.fortune[data-state="sealed"] .envelope,
+.fortune[data-state="opening"] .envelope,
+.fortune-error { margin-bottom: auto; }
+
+.close {
+  position: fixed;
+  z-index: 3;
+  top: max(14px, calc(env(safe-area-inset-top) + 8px));
+  left: max(14px, calc(env(safe-area-inset-left) + 8px));
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid rgba(230, 187, 103, .55);
+  border-radius: 50%;
+  background: rgba(6, 25, 28, .82);
+  color: var(--gold-hi);
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+.close:hover { background: rgba(110, 18, 25, .9); border-color: var(--gold); }
+.close:focus-visible, .btn:focus-visible, .envelope__hit:focus-visible, .letter:focus-visible {
+  outline: 2px solid var(--gold-hi);
+  outline-offset: 4px;
+}
+.letter:focus:not(:focus-visible) { outline: none; }
+
+.hint {
+  max-width: 22rem;
+  margin: 0 0 clamp(64px, 16vh, 120px);
+  font-size: clamp(16px, 4.3vw, 19px);
+  line-height: 1.9;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--gold-hi);
+  animation: fade-in .8s ease-out .35s both;
+  transition: opacity .4s ease, translate .4s ease;
+}
+.fortune[data-state="opening"] .hint { opacity: 0; translate: 0 -8px; }
+
+/* ───────── پاکت ───────── */
+
+.envelope {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  width: min(86vw, 400px, var(--vh) * .72);
+  aspect-ratio: 400 / 280;
+  perspective: 1100px;
+}
+.envelope.is-arriving { animation: env-arrive 1s var(--ease-out) both; }
+@keyframes env-arrive {
+  from { opacity: 0; transform: translateY(42px) rotate(-2.5deg) scale(.95); }
+}
+.envelope::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 4%; right: 4%; bottom: -9%;
+  height: 18%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .6), transparent);
+}
+.envelope.is-leaving {
+  position: fixed;
+  margin: 0;
+  animation: env-leave .6s cubic-bezier(.55, 0, .75, .2) forwards;
+}
+@keyframes env-leave {
+  to { opacity: 0; transform: translateY(60px) scale(.94); }
+}
+.envelope.is-instant, .envelope.is-instant * { transition: none !important; }
+
+.env-back {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 5px;
+  background: linear-gradient(#36060b, #4c0a12 70%);
+  box-shadow: inset 0 0 0 1px rgba(230, 187, 103, .3);
+}
+
+.env-pocket {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, .35));
+}
+.env-rule { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.env-rule--inner { stroke-width: .7; opacity: .85; }
+.env-fold { fill: none; stroke: rgba(240, 200, 120, .5); stroke-width: 1; }
+.env-rosettes circle { fill: var(--gold); }
+.env-address { font-family: var(--f-nast); font-size: 25px; fill: #edc777; }
+
+.env-flap {
+  position: absolute;
+  z-index: 4;
+  top: 0; left: 0;
+  width: 100%;
+  height: 64.3%;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  transition: transform .85s cubic-bezier(.45, .05, .25, 1) .18s, z-index 0s .62s;
+}
+.env-flap__face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.env-flap__face--front { filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .35)); }
+.env-flap__face--back { transform: rotateX(180deg); }
+.fortune[data-state="opening"] .env-flap { transform: rotateX(180deg); z-index: 1; }
+
+/* مُهر شمسه */
+.seal {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 58.5%;
+  width: 21%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .45));
+  animation: seal-breathe 2.8s ease-in-out infinite;
+}
+.seal__half { position: absolute; inset: 0; }
+.seal__half svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.seal__half--r { clip-path: polygon(51% 0, 100% 0, 100% 100%, 48% 100%, 54% 74%, 46% 52%, 55% 27%); }
+.seal__half--l { clip-path: polygon(0 0, 51% 0, 55% 27%, 46% 52%, 54% 74%, 48% 100%, 0 100%); }
+@keyframes seal-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.045; }
+}
+.fortune.is-loading .seal { animation-duration: 1.2s; }
+.fortune[data-state="opening"] .seal { animation: seal-press .2s ease-out forwards; }
+.fortune[data-state="opening"] .seal__half--r { animation: crack-r .75s cubic-bezier(.5, 0, .8, .4) .12s forwards; }
+.fortune[data-state="opening"] .seal__half--l { animation: crack-l .75s cubic-bezier(.5, 0, .8, .4) .12s forwards; }
+@keyframes seal-press { to { scale: .92; } }
+@keyframes crack-r { to { transform: translate(-22%, 70%) rotate(-24deg); opacity: 0; } }
+@keyframes crack-l { to { transform: translate(22%, 70%) rotate(24deg); opacity: 0; } }
+
+.envelope__hit {
+  position: absolute;
+  z-index: 6;
+  inset: -10px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+.fortune.is-loading .envelope__hit { cursor: progress; }
+
+/* نامه داخل پاکت: همان نامهٔ خواندنی، کوچک‌شده تا اندازهٔ پاکت */
+.envelope .letter {
+  position: absolute;
+  z-index: 2;
+  top: 4%;
+  left: 50%;
+  height: var(--lh, 300px);
+  overflow: hidden;
+  transform-origin: 50% 0;
+  transform: translateX(-50%) translateY(0) scale(var(--s, .6));
+  transition: transform 1s var(--ease-out);
+}
+.envelope.is-rising .letter { transform: translateX(-50%) translateY(var(--rise, -100px)) scale(var(--s, .6)); }
+
+/* ───────── برگ نامه ───────── */
+
+.letter {
+  position: relative;
+  flex: none;
+  width: var(--read-w);
+  padding: clamp(10px, 3.2vw, 24px);
+  border-radius: 3px;
+  color: var(--ink);
+  background:
+    url("../images/zarafshan.svg") 0 0 / 190px,
+    radial-gradient(130% 90% at 50% 0%, #26487a, var(--lapis) 55%, var(--lapis-deep));
+  box-shadow:
+    0 34px 60px -24px rgba(0, 0, 0, .8),
+    0 2px 5px rgba(0, 0, 0, .45);
+}
+.letter ::selection { background: rgba(29, 58, 102, .22); }
+
+.letter__page {
+  container-type: inline-size;
+  padding: clamp(22px, 6vw, 38px) clamp(18px, 5.5vw, 40px) clamp(22px, 5vw, 32px);
+  background: url("../images/paper-grain.svg") 0 0 / 300px, var(--paper);
+  box-shadow:
+    inset 0 0 0 1px var(--gold-deep),
+    inset 0 0 0 4px #e2b45e,
+    inset 0 0 0 5px var(--gold-deep),
+    inset 0 0 0 8px var(--paper),
+    inset 0 0 0 9px var(--lapis),
+    0 0 0 1px rgba(0, 0, 0, .25);
+}
+
+.letter__head {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 21rem);
+  aspect-ratio: 320 / 92;
+  margin: 0 auto clamp(10px, 3vw, 18px);
+}
+.cartouche { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cartouche__body { fill: var(--lapis); stroke: var(--gold-deep); stroke-width: 1; }
+.cartouche__rule { fill: none; stroke: var(--gold); stroke-width: 1.4; }
+.cartouche__tip, .cartouche__dot { fill: var(--gold); }
+.letter__title {
+  position: relative;
+  margin: 0;
+  padding-bottom: .12em;
+  font: 400 clamp(27px, 8vw, 38px)/1.2 var(--f-nast);
+  color: var(--gold-hi);
+  white-space: nowrap;
+}
+
+/* بلندترین مصراع حدود ۱۰٫۶em است؛ اندازهٔ قلم از عرض برگ گرفته می‌شود تا هیچ مصراعی نشکند. */
+.poem {
+  max-width: 12.8em;
+  margin: 0 auto 4px;
+  font-size: min(31px, 8.3cqi);
+}
+.beyt {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: .2em 0 .45em;
+  background: linear-gradient(to left, transparent, rgba(160, 110, 40, .5) 30% 70%, transparent) bottom / 100% 1px no-repeat;
+}
+.beyt:last-child { background: none; }
+.misra {
+  display: block;
+  font: 400 1em/1.85 var(--f-nast);
+  color: var(--ink);
+  text-wrap: balance;
+}
+.misra:first-child { text-align: right; padding-left: 9%; }
+.misra:last-child  { text-align: left;  padding-right: 9%; }
+
+.reading { margin-top: clamp(18px, 5vw, 26px); }
+.rubric {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 6px;
+  font-size: clamp(15px, 4.2vw, 17px);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--vermilion);
+  white-space: nowrap;
+}
+.rubric::before, .rubric::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to var(--dir, left), rgba(122, 82, 27, .55), transparent);
+}
+.rubric::before { --dir: right; }
+.reading p {
+  margin: 0;
+  font-size: clamp(15.5px, 4.2vw, 17px);
+  line-height: 2.05;
+  color: var(--ink-soft);
+  text-align: justify;
+}
+.reading .advice {
+  font-size: clamp(16.5px, 4.6vw, 18.5px);
+  font-weight: 700;
+  line-height: 1.95;
+  color: #5c1a10;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.letter__foot {
+  position: relative;
+  margin-top: clamp(20px, 5vw, 28px);
+  padding: 4px 0 2px;
+  text-align: center;
+}
+.letter__foot p {
+  margin: 0;
+  font: 400 clamp(22px, 6vw, 27px)/1.6 var(--f-nast);
+  color: var(--gold-deep);
+}
+.stamp {
+  position: absolute;
+  left: -4px;
+  bottom: -10px;
+  width: clamp(56px, 15vw, 70px);
+  rotate: -11deg;
+  opacity: .82;
+  mix-blend-mode: multiply;
+}
+.stamp__ring { fill: none; stroke: #b5301e; stroke-width: 3.2; }
+.stamp__ring--thin { stroke-width: 1.2; }
+.stamp__word { font-family: var(--f-nast); font-size: 34px; fill: #b5301e; }
+
+/* ───────── دکمه‌ها و خطا ───────── */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 30px;
+  animation: fade-in .6s ease-out .5s both;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fde9b8;
+  background: linear-gradient(#9c1c26, #690f17);
+  box-shadow:
+    inset 0 0 0 1px #f0cd84,
+    inset 0 0 0 3px #7a1119,
+    inset 0 0 0 4px rgba(240, 205, 132, .55),
+    0 12px 24px -10px rgba(0, 0, 0, .8);
+  cursor: pointer;
+  transition: filter .2s ease, translate .15s ease;
+}
+.btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.btn:hover { filter: brightness(1.12); }
+.btn:active { translate: 0 1px; }
+.btn--quiet {
+  min-height: 46px;
+  padding: 0 14px;
+  font-weight: 400;
+  color: var(--gold);
+  background: none;
+  box-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: rgba(230, 187, 103, .45);
+  text-underline-offset: 7px;
+}
+.btn--quiet:hover { color: var(--gold-hi); filter: none; }
+
+.fortune-error {
+  max-width: 22rem;
+  margin-top: auto;
+  font-size: 17px;
+  line-height: 1.95;
+  text-align: center;
+  color: var(--gold-hi);
+}
+.fortune-error p { margin: 0 0 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0s !important;
+  }
+  .glow, .hotspot::before { display: none; }
+}

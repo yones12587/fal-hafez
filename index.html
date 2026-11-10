@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#06191c">
+  <meta name="description" content="فال حافظ در شب یلدا؛ نیت کنید، مُهر پاکت را بشکنید و غزلی از دیوان حافظ بخوانید.">
+  <title>فال حافظ | شب یلدا</title>
+  <link rel="preload" href="./static/fonts/IranNastaliq.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./static/images/yalda-mobile.webp" as="image" type="image/webp" media="(max-aspect-ratio: 9/10)">
+  <link rel="preload" href="./static/images/yalda-desktop.webp" as="image" type="image/webp" media="(min-aspect-ratio: 9/10)">
+  <link rel="stylesheet" href="./static/css/style.css?v=20261104b">
+</head>
+<body>
+  <main class="hero" id="hero">
+    <div class="stage">
+      <h1 class="site-title">فال حافظ</h1>
+      <span class="glow glow--moon" aria-hidden="true"></span>
+      <span class="glow glow--candle glow--c1" aria-hidden="true"></span>
+      <span class="glow glow--candle glow--c2" aria-hidden="true"></span>
+      <span class="glow glow--candle glow--c3" aria-hidden="true"></span>
+      <span class="glow glow--candle glow--c4" aria-hidden="true"></span>
+      <button id="getFortune" class="hotspot" type="button" aria-haspopup="dialog" aria-controls="fortune">
+        <span class="sr-only">گرفتن فال حافظ</span>
+      </button>
+    </div>
+    <p class="sr-only">در شب یلدا، با دیوان حافظ به روشنی فردا فکر کن...</p>
+  </main>
+
+  <div id="fortune" class="fortune" role="dialog" aria-modal="true" aria-labelledby="fortuneHeading" data-state="sealed" hidden>
+    <div class="fortune__veil" aria-hidden="true"></div>
+
+    <button id="closeFortune" class="close" type="button" aria-label="بستن">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="fortune__scroll" id="fortuneScroll">
+      <h2 id="fortuneHeading" class="sr-only">فال حافظ شما</h2>
+      <p class="hint" id="hint" aria-live="polite">نیت کنید، سپس مُهر پاکت را بشکنید</p>
+
+      <div class="envelope" id="envelope">
+        <span class="env-back" aria-hidden="true"></span>
+
+        <article class="letter" id="letter" aria-labelledby="fortuneTitle" tabindex="-1">
+          <div class="letter__page">
+            <header class="letter__head">
+              <svg class="cartouche" viewBox="0 0 320 92" preserveAspectRatio="none" aria-hidden="true">
+                <path class="cartouche__body" d="M30 46 C30 22 52 8 76 8 H244 C268 8 290 22 290 46 C290 70 268 84 244 84 H76 C52 84 30 70 30 46 Z"/>
+                <path class="cartouche__rule" d="M38 46 C38 27 56 15 77 15 H243 C264 15 282 27 282 46 C282 65 264 77 243 77 H77 C56 77 38 65 38 46 Z"/>
+                <path class="cartouche__tip" d="M30 46 C22 40 14 40 4 46 C14 52 22 52 30 46 Z M290 46 C298 40 306 40 316 46 C306 52 298 52 290 46 Z"/>
+                <circle class="cartouche__dot" cx="160" cy="4" r="2.6"/><circle class="cartouche__dot" cx="160" cy="88" r="2.6"/>
+              </svg>
+              <h3 class="letter__title" id="fortuneTitle">فال شما</h3>
+            </header>
+
+            <div class="poem" id="fortunePoem"></div>
+
+            <section class="reading" aria-labelledby="interpretationLabel">
+              <h4 class="rubric" id="interpretationLabel">تعبیر فال</h4>
+              <p id="fortuneInterpretation"></p>
+            </section>
+
+            <section class="reading" aria-labelledby="adviceLabel">
+              <h4 class="rubric" id="adviceLabel">پیام حافظ برای شما</h4>
+              <p id="fortuneAdvice" class="advice"></p>
+            </section>
+
+            <footer class="letter__foot">
+              <p>با نیتی روشن و دلی آرام</p>
+              <svg class="stamp" viewBox="-50 -50 100 100" aria-hidden="true">
+                <circle r="45" class="stamp__ring"/>
+                <circle r="38" class="stamp__ring stamp__ring--thin"/>
+                <text class="stamp__word" y="12" text-anchor="middle">حافظ</text>
+              </svg>
+            </footer>
+          </div>
+        </article>
+
+        <svg class="env-pocket" viewBox="0 0 400 280" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="pocketSide" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#5c0d16"/><stop offset="1" stop-color="#761620"/>
+            </linearGradient>
+            <linearGradient id="pocketSideR" x1="1" y1="0" x2="0" y2="0">
+              <stop offset="0" stop-color="#5c0d16"/><stop offset="1" stop-color="#761620"/>
+            </linearGradient>
+            <linearGradient id="pocketBottom" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#86202a"/><stop offset="1" stop-color="#5e0e17"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 0 L196 148 L0 280 Z" fill="url(#pocketSide)"/>
+          <path d="M400 0 L204 148 L400 280 Z" fill="url(#pocketSideR)"/>
+          <path d="M0 280 L176 136 Q200 118 224 136 L400 280 Z" fill="url(#pocketBottom)"/>
+          <path d="M0 0 L196 148 L0 280 Z M400 0 L204 148 L400 280 Z M0 280 L176 136 Q200 118 224 136 L400 280 Z" fill="url(#envGrain)" opacity=".55"/>
+          <path class="env-fold" d="M0 280 L176 136 Q200 118 224 136 L400 280"/>
+          <path class="env-rule" d="M9 30 V271 H391 V30"/>
+          <path class="env-rule env-rule--inner" d="M15 36 V265 H385 V36"/>
+          <g class="env-rosettes">
+            <circle cx="15" cy="265" r="3.2"/><circle cx="385" cy="265" r="3.2"/>
+          </g>
+          <text class="env-address" x="200" y="254" text-anchor="middle">شب یلدا</text>
+        </svg>
+
+        <div class="env-flap" aria-hidden="true">
+          <svg class="env-flap__face env-flap__face--front" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="flapFront" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#7c1720"/><stop offset="1" stop-color="#951f2a"/>
+              </linearGradient>
+            </defs>
+            <path d="M0 0 H400 V4 L232 128 C214 141 206 156 200 174 C194 156 186 141 168 128 L0 4 Z" fill="url(#flapFront)"/>
+            <path d="M0 0 H400 V4 L232 128 C214 141 206 156 200 174 C194 156 186 141 168 128 L0 4 Z" fill="url(#envGrain)" opacity=".55"/>
+            <path class="env-rule" d="M9 9 L170 122 C188 136 196 150 200 162 C204 150 212 136 230 122 L391 9"/>
+          </svg>
+          <svg class="env-flap__face env-flap__face--back" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <path d="M0 0 H400 V4 L232 128 C214 141 206 156 200 174 C194 156 186 141 168 128 L0 4 Z" fill="#1d3a66"/>
+            <path d="M0 0 H400 V4 L232 128 C214 141 206 156 200 174 C194 156 186 141 168 128 L0 4 Z" fill="url(#flapFlecks)"/>
+            <defs>
+              <pattern id="flapFlecks" width="130" height="130" patternUnits="userSpaceOnUse">
+                <image href="./static/images/zarafshan.svg" width="130" height="130"/>
+              </pattern>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="seal" aria-hidden="true">
+          <span class="seal__half seal__half--r"><svg viewBox="-50 -50 100 100"><use href="#shamseh"/></svg></span>
+          <span class="seal__half seal__half--l"><svg viewBox="-50 -50 100 100"><use href="#shamseh"/></svg></span>
+        </div>
+
+        <button class="envelope__hit" id="envelopeHit" type="button" aria-label="شکستن مُهر و گشودن پاکت"></button>
+      </div>
+
+      <div class="actions" id="actions" hidden>
+        <button id="newFortune" class="btn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.35-5.66M20 4v5h-5"/></svg>
+          <span>گرفتن فالی دیگر</span>
+        </button>
+        <button id="backToScene" class="btn btn--quiet" type="button">بازگشت به شب یلدا</button>
+      </div>
+
+      <div class="fortune-error" id="fortuneError" role="alert" hidden>
+        <p>فال به دستمان نرسید. اتصال اینترنت را بررسی کنید و دوباره امتحان کنید.</p>
+        <button id="retryFortune" class="btn" type="button">تلاش دوباره</button>
+      </div>
+    </div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="envGrain" width="150" height="150" patternUnits="userSpaceOnUse">
+        <image href="./static/images/paper-grain.svg" width="150" height="150"/>
+      </pattern>
+      <radialGradient id="sealGold" cx=".38" cy=".3" r=".8">
+        <stop offset="0" stop-color="#fff0bd"/><stop offset=".45" stop-color="#e3b55a"/><stop offset="1" stop-color="#9a6421"/>
+      </radialGradient>
+      <radialGradient id="sealLapis" cx=".4" cy=".35" r=".75">
+        <stop offset="0" stop-color="#2f5b9a"/><stop offset="1" stop-color="#132a52"/>
+      </radialGradient>
+      <g id="shamseh">
+        <polygon fill="url(#sealGold)" stroke="#7a4a14" stroke-width=".8" points="0.00,-48.00 7.80,-39.23 18.37,-44.35 22.22,-33.26 33.94,-33.94 33.26,-22.22 44.35,-18.37 39.23,-7.80 48.00,0.00 39.23,7.80 44.35,18.37 33.26,22.22 33.94,33.94 22.22,33.26 18.37,44.35 7.80,39.23 0.00,48.00 -7.80,39.23 -18.37,44.35 -22.22,33.26 -33.94,33.94 -33.26,22.22 -44.35,18.37 -39.23,7.80 -48.00,0.00 -39.23,-7.80 -44.35,-18.37 -33.26,-22.22 -33.94,-33.94 -22.22,-33.26 -18.37,-44.35 -7.80,-39.23"/>
+        <circle r="33" fill="url(#sealLapis)" stroke="#f3d48a" stroke-width="2.4"/>
+        <circle r="28.5" fill="none" stroke="#e1b25c" stroke-width=".8" stroke-dasharray="1.6 2.4"/>
+        <text y="9" text-anchor="middle" fill="#f6d98e" font-family="IranNastaliq, serif" font-size="27">حافظ</text>
+      </g>
+    </defs>
+  </svg>
+
+  <script src="./static/js/app.js?v=20261104" defer></script>
+</body>
+</html>

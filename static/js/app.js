@@ -1,4 +1,3 @@
-
 (() => {
   'use strict';
 
@@ -24,6 +23,10 @@
   const newFortuneButton = $('newFortune');
   const backButton = $('backToScene');
 
+  const shareButton = $('shareFortune');
+  const shareStatus = $('shareStatus');
+  const shareText = $('shareText');
+
   const errorBox = $('fortuneError');
   const retryButton = $('retryFortune');
 
@@ -46,6 +49,19 @@
 
   const FORTUNES_COOKIE_KEY = 'hafez_seen_fortunes_v1';
 
+  const NASTALIQ_FILE = './static/data/nastaliq.json?v=20261125';
+
+  const SITE_URL = 'https://falefafez12.ir/';
+
+  const FETCH_TIMEOUT_MS = 15000;
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  // انیمیشن‌های جاوااسکریپتی فقط وقتی اجرا می‌شوند که لغو کردنشان هم ممکن باشد.
+  const canAnimate =
+    typeof Element.prototype.animate === 'function' &&
+    typeof Element.prototype.getAnimations === 'function';
+
   // ==============================
   // STATE
   // ==============================
@@ -53,6 +69,15 @@
   let fortunesCache = null;
 
   let fortunePromise = null;
+
+  let nastaliqData = null;
+
+  let nastaliqRequest = null;
+
+  let currentFortune = null;
+
+  // فقط پاسخ آخرین درخواست روی صفحه اعمال می‌شود.
+  let requestToken = 0;
 
   let busy = false;
 
@@ -71,6 +96,139 @@
       reduceMotion.matches ? 0 : ms
     );
   });
+
+  function cancelAnimations(element) {
+    if (canAnimate) {
+      element.getAnimations().forEach(
+        (animation) => animation.cancel()
+      );
+    }
+  }
+
+  // fetch با مهلت زمانی؛ شبکهٔ کند نباید صفحه را بی‌پاسخ نگه دارد.
+  // بدنهٔ پاسخ هم داخل همین مهلت خوانده می‌شود.
+  async function fetchJson(url) {
+    const controller =
+      typeof AbortController === 'function'
+        ? new AbortController()
+        : null;
+
+    let timer = 0;
+
+    const timeout = new Promise((resolve, reject) => {
+      timer = window.setTimeout(() => {
+        reject(new Error(`Timed out: ${url}`));
+        if (controller) controller.abort();
+      }, FETCH_TIMEOUT_MS);
+    });
+
+    const request = (async () => {
+      const options = {
+        headers: { Accept: 'application/json' },
+        cache: 'no-cache'
+      };
+
+      if (controller) options.signal = controller.signal;
+
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${url}`);
+      }
+
+      return response.json();
+    })();
+
+    try {
+      return await Promise.race([request, timeout]);
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
+  // ==============================
+  // NASTALIQ OUTLINES
+  // ==============================
+
+  // متن‌های نستعلیق از پیش به مسیر SVG تبدیل شده‌اند (tools/build-nastaliq.mjs)
+  // تا شکل‌دهی حروف در همهٔ موتورهای مرورگر یکسان باشد.
+  // اگر این داده نرسد، همان متن با قلم وب نمایش داده می‌شود.
+
+  function loadNastaliq() {
+    if (!nastaliqRequest) {
+      nastaliqRequest = fetchJson(NASTALIQ_FILE).then(
+        (data) => {
+          nastaliqData =
+            data && data.lines && data.glyphs ? data : null;
+        },
+        (error) => {
+          console.warn('Nastaliq outlines unavailable:', error);
+          nastaliqRequest = null;
+        }
+      );
+    }
+
+    return nastaliqRequest;
+  }
+
+  function setNastaliq(node, text, lineHeight) {
+    node.textContent = '';
+
+    const data = nastaliqData;
+    const line = data && data.lines[text];
+
+    node.classList.toggle('is-text', !line);
+
+    if (!line) {
+      node.textContent = text;
+      return;
+    }
+
+    const upem = data.upem;
+    const width = line[0];
+    const glyphs = line[1];
+
+    // جای خط کرسی مثل متن معمولی: نیم‌فاصلهٔ سطر به‌اضافهٔ ascender
+    const baseline =
+      (lineHeight * upem - data.ascender - data.descender) / 2 +
+      data.ascender;
+
+    const svg = document.createElementNS(SVG_NS, 'svg');
+
+    svg.setAttribute('class', 'nast');
+    svg.setAttribute(
+      'viewBox',
+      `0 ${-baseline} ${width} ${lineHeight * upem}`
+    );
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+
+    svg.style.width = `${(width / upem).toFixed(4)}em`;
+    svg.style.height = `${lineHeight}em`;
+
+    const group = document.createElementNS(SVG_NS, 'g');
+
+    group.setAttribute('transform', 'scale(1 -1)');
+
+    glyphs.forEach(([id, x, y]) => {
+      const path = document.createElementNS(SVG_NS, 'path');
+
+      path.setAttribute('d', data.glyphs[id]);
+      path.setAttribute('transform', `translate(${x} ${y})`);
+
+      group.appendChild(path);
+    });
+
+    svg.appendChild(group);
+
+    const label = document.createElement('span');
+
+    label.className = 'sr-only';
+    label.textContent = text;
+
+    node.appendChild(svg);
+    node.appendChild(label);
+  }
 
   // ==============================
   // FORTUNE HISTORY
@@ -156,20 +314,7 @@
       return fortunesCache;
     }
 
-    const response = await fetch(FORTUNES_FILE, {
-      headers: {
-        Accept: 'application/json'
-      },
-      cache: 'no-cache'
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Could not load fortunes: HTTP ${response.status}`
-      );
-    }
-
-    const data = await response.json();
+    const data = await fetchJson(FORTUNES_FILE);
 
     // بررسی سلامت بانک فال‌ها
 
@@ -208,7 +353,10 @@
   // ==============================
 
   async function requestFortune() {
-    const fortunes = await loadFortunesDatabase();
+    const [fortunes] = await Promise.all([
+      loadFortunesDatabase(),
+      loadNastaliq()
+    ]);
 
     // سابقه فال‌های قبلی
 
@@ -258,9 +406,11 @@
   // ==============================
 
   function fillLetter(fortune) {
-    titleNode.textContent = fortune.title;
+    currentFortune = fortune;
 
-    poemNode.replaceChildren();
+    setNastaliq(titleNode, fortune.title, 1.2);
+
+    poemNode.textContent = '';
 
     // هر دو مصراع یک بیت‌اند.
     // مصراع اول راست‌چین و مصراع دوم چپ‌چین.
@@ -275,12 +425,12 @@
 
         misra.className = 'misra';
 
-        misra.textContent = line;
+        setNastaliq(misra, line, 1.85);
 
-        beyt.append(misra);
+        beyt.appendChild(misra);
       });
 
-      poemNode.append(beyt);
+      poemNode.appendChild(beyt);
     }
 
     interpretationNode.textContent =
@@ -344,13 +494,11 @@
   // ==============================
 
   function resetToEnvelope() {
-    letter.getAnimations().forEach(
-      (animation) => animation.cancel()
-    );
+    cancelAnimations(letter);
 
-    envelope.getAnimations().forEach(
-      (animation) => animation.cancel()
-    );
+    cancelAnimations(envelope);
+
+    resetShare();
 
     envelope.classList.add('is-instant');
 
@@ -361,7 +509,7 @@
 
     envelope.removeAttribute('style');
 
-    pocket.before(letter);
+    envelope.insertBefore(letter, pocket);
 
     dialog.dataset.state = 'sealed';
 
@@ -397,7 +545,15 @@
   function loadNext() {
     dialog.classList.add('is-loading');
 
+    requestToken += 1;
+
+    const token = requestToken;
+
+    currentFortune = null;
+
     fortunePromise = requestFortune().then((fortune) => {
+      if (token !== requestToken) return fortune;
+
       fillLetter(fortune);
 
       fitLetterToEnvelope();
@@ -408,6 +564,8 @@
     });
 
     fortunePromise.catch((error) => {
+      if (token !== requestToken) return;
+
       console.error(
         'Could not load Hafez fortune:',
         error
@@ -438,7 +596,10 @@
 
     dialog.hidden = false;
 
+    // inert در مرورگرهای قدیمی نیست؛ aria-hidden و حلقهٔ Tab جای آن را می‌گیرند.
     hero.inert = true;
+
+    hero.setAttribute('aria-hidden', 'true');
 
     document.documentElement.classList.add(
       'is-locked'
@@ -468,6 +629,8 @@
 
     hero.inert = false;
 
+    hero.removeAttribute('aria-hidden');
+
     document.documentElement.classList.remove(
       'is-locked'
     );
@@ -495,7 +658,7 @@
 
     try {
       await fortunePromise;
-    } catch {
+    } catch (error) {
       busy = false;
       return;
     }
@@ -545,13 +708,14 @@
 
     scroller.scrollTop = 0;
 
-    if (reduceMotion.matches) {
+    if (reduceMotion.matches || !canAnimate) {
       envelope.hidden = true;
     } else {
       Object.assign(envelope.style, {
         left: `${envelopeBox.left}px`,
         top: `${envelopeBox.top}px`,
-        width: `${envelopeBox.width}px`
+        width: `${envelopeBox.width}px`,
+        height: `${envelopeBox.height}px`
       });
 
       envelope.classList.add('is-leaving');
@@ -619,7 +783,7 @@
     const run = session;
 
     try {
-      if (!reduceMotion.matches) {
+      if (!reduceMotion.matches && canAnimate) {
         const fade = [
           { opacity: 1 },
           {
@@ -634,14 +798,12 @@
           fill: 'forwards'
         };
 
-        await Promise.all([
-          letter.animate(fade, options).finished,
-          actions.animate(fade, options).finished
-        ]);
+        letter.animate(fade, options);
+        actions.animate(fade, options);
 
-        actions.getAnimations().forEach(
-          (animation) => animation.cancel()
-        );
+        await wait(options.duration);
+
+        cancelAnimations(actions);
       }
     } catch (error) {
       console.warn('Fortune transition was interrupted:', error);
@@ -658,6 +820,114 @@
     });
 
     busy = false;
+  }
+
+  // ==============================
+  // SHARE
+  // ==============================
+
+  function buildShareText(fortune) {
+    const beyts = [];
+
+    for (let i = 0; i < fortune.poem.length; i += 2) {
+      beyts.push(fortune.poem.slice(i, i + 2).join('\n'));
+    }
+
+    return [
+      `فال حافظ شب یلدا — ${fortune.title}`,
+      beyts.join('\n\n'),
+      fortune.interpretation
+        ? `تعبیر فال: ${fortune.interpretation}`
+        : '',
+      fortune.advice ? `پیام حافظ: ${fortune.advice}` : ''
+    ].filter(Boolean).join('\n\n');
+  }
+
+  function resetShare() {
+    shareStatus.textContent = '';
+    shareText.hidden = true;
+    shareText.value = '';
+  }
+
+  // آخرین راه: متن در کادر انتخاب‌شده نمایش داده می‌شود تا دستی کپی شود.
+  function offerManualCopy(text) {
+    shareText.value = text;
+    shareText.hidden = false;
+    shareStatus.textContent =
+      'متن فال آماده است؛ آن را انتخاب و کپی کنید.';
+    shareText.focus();
+    shareText.select();
+  }
+
+  async function copyFortune(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        shareText.hidden = true;
+        shareStatus.textContent =
+          'متن فال کپی شد؛ هر جا خواستید بچسبانید.';
+        return;
+      } catch (error) {
+        console.warn('Clipboard write failed:', error);
+      }
+    }
+
+    offerManualCopy(text);
+  }
+
+  async function shareFortune() {
+    if (!currentFortune) return;
+
+    const run = session;
+    const body = buildShareText(currentFortune);
+
+    shareStatus.textContent = '';
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: 'فال حافظ شب یلدا',
+          text: body,
+          url: SITE_URL
+        });
+        return;
+      } catch (error) {
+        // کاربر خودش پنجرهٔ هم‌رسانی را بسته است.
+        if (error && error.name === 'AbortError') return;
+        console.warn('Web Share failed:', error);
+      }
+    }
+
+    if (run !== session) return;
+
+    await copyFortune(`${body}\n\n${SITE_URL}`);
+  }
+
+  // فوکوس صفحه‌کلید داخل پنجرهٔ فال می‌ماند.
+  function trapFocus(event) {
+    const items = Array.prototype.filter.call(
+      dialog.querySelectorAll(
+        'button, textarea, [tabindex]:not([tabindex="-1"])'
+      ),
+      (item) => !item.disabled && item.getClientRects().length > 0
+    );
+
+    if (!items.length) return;
+
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+
+    if (!dialog.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   // ==============================
@@ -708,6 +978,11 @@
     retry
   );
 
+  shareButton.addEventListener(
+    'click',
+    shareFortune
+  );
+
   scroller.addEventListener('click', (event) => {
     if (
       event.target === scroller &&
@@ -718,11 +993,13 @@
   });
 
   document.addEventListener('keydown', (event) => {
-    if (
-      event.key === 'Escape' &&
-      !dialog.hidden
-    ) {
+    if (dialog.hidden) return;
+
+    // «Esc» نام این کلید در مرورگرهای قدیمی است.
+    if (event.key === 'Escape' || event.key === 'Esc') {
       closeDialog();
+    } else if (event.key === 'Tab') {
+      trapFocus(event);
     }
   });
 
@@ -730,5 +1007,43 @@
     'resize',
     fitLetterToEnvelope
   );
+
+  // ==============================
+  // ART FALLBACK
+  // ==============================
+
+  // اگر تصویر صحنه نرسد، دکمه باید همچنان دیده شود.
+  const art = hero.querySelector('.stage__art img');
+
+  function showWithoutArt() {
+    hero.classList.add('no-art');
+  }
+
+  if (art) {
+    art.addEventListener('error', showWithoutArt);
+
+    if (art.complete && art.naturalWidth === 0) {
+      showWithoutArt();
+    }
+  }
+
+  // ==============================
+  // IDLE PRELOAD
+  // ==============================
+
+  // پس از کامل شدن صفحه، داده‌های فال از پیش گرفته می‌شوند
+  // تا بارگذاری تصویرهای اصلی عقب نیفتد.
+  function warmUp() {
+    loadNastaliq();
+    loadFortunesDatabase().catch((error) => {
+      console.warn('Fortune preload failed:', error);
+    });
+  }
+
+  if (document.readyState === 'complete') {
+    warmUp();
+  } else {
+    window.addEventListener('load', warmUp, { once: true });
+  }
 
 })();
